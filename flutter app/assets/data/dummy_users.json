@@ -1,0 +1,10 @@
+[
+  {
+    "id": "1",
+    "email": "user@example.com",
+    "password": "password123",
+    "isVerified": true,
+    "balance": 10000.0,
+    "profileImagePath": null
+  }
+]
