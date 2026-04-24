@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../widgets/animated_success_indicator.dart';
 import '../theme/design_system.dart';
+import 'package:provider/provider.dart';
+import '../providers/transaction_provider.dart';
 
 class ChargeSuccessScreen extends StatefulWidget {
   final String type;
@@ -22,6 +24,20 @@ class ChargeSuccessScreen extends StatefulWidget {
 }
 
 class _ChargeSuccessScreenState extends State<ChargeSuccessScreen> {
+  @override
+  void initState() {
+    super.initState();
+    if (widget.type == 'charge' && widget.amount != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        context.read<TransactionProvider>().addTransaction(
+              amount: widget.amount!.toDouble(),
+              type: 'charge',
+              method: widget.method ?? 'card',
+              description: 'ポイントチャージ',
+            );
+      });
+    }
+  }
   String get _title {
     switch (widget.type) {
       case 'charge':

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import '../theme/design_system.dart';
 import '../widgets/animated_success_indicator.dart';
+import '../providers/transaction_provider.dart';
 
 class PaymentSuccessScreen extends StatefulWidget {
   final int amount;
@@ -18,6 +20,18 @@ class PaymentSuccessScreen extends StatefulWidget {
 }
 
 class _PaymentSuccessScreenState extends State<PaymentSuccessScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<TransactionProvider>().addTransaction(
+            amount: widget.amount.toDouble(),
+            type: 'payment',
+            method: 'qr',
+            description: '支払い決済',
+          );
+    });
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(

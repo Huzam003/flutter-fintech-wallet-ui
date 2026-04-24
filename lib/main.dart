@@ -7,6 +7,7 @@ import 'providers/auth_provider.dart';
 import 'providers/settings_provider.dart';
 import 'providers/payment_methods_provider.dart';
 import 'providers/verification_provider.dart';
+import 'providers/transaction_provider.dart';
 import 'screens/welcome_screen.dart';
 import 'screens/splash_screen.dart';
 import 'screens/login_screen.dart';
@@ -63,6 +64,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => SettingsProvider()),
         ChangeNotifierProvider(create: (_) => PaymentMethodsProvider()),
         ChangeNotifierProvider(create: (_) => VerificationProvider()),
+        ChangeNotifierProvider(create: (_) => TransactionProvider()),
       ],
       child: MaterialApp(
         title: 'ユーザーアプリ',

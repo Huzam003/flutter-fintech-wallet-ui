@@ -1,6 +1,9 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../theme/design_system.dart';
+import 'package:provider/provider.dart';
+import '../providers/transaction_provider.dart';
+import '../models/transaction.dart' as model;
 import 'history_screen.dart';
 
 class FullHistoryScreen extends StatefulWidget {
@@ -25,29 +28,11 @@ class _FullHistoryScreenState extends State<FullHistoryScreen> {
     super.dispose();
   }
 
-  final List<Transaction> _allTransactions = [
-    Transaction(
-      date: '2025/12/01',
-      type: 'チャージ',
-      amount: 10000,
-      isCredit: true,
-    ),
-    Transaction(date: '2025/12/02', type: '決済', amount: 5000, isCredit: false),
-    Transaction(date: '2025/12/03', type: 'チャージ', amount: 1000, isCredit: true),
-    Transaction(date: '2025/12/04', type: '決済', amount: 1000, isCredit: false),
-    Transaction(date: '2025/12/05', type: '決済', amount: 500, isCredit: false),
-    Transaction(
-      date: '2025/12/06',
-      type: 'チャージ',
-      amount: 20000,
-      isCredit: true,
-    ),
-    Transaction(date: '2025/12/07', type: '決済', amount: 3000, isCredit: false),
-    Transaction(date: '2025/12/08', type: '決済', amount: 2500, isCredit: false),
-  ];
+  List<model.Transaction> _allTransactions = [];
 
   @override
   Widget build(BuildContext context) {
+    _allTransactions = context.watch<TransactionProvider>().transactions;
     return Scaffold(
       resizeToAvoidBottomInset: false,
       backgroundColor: AppColors.background,
@@ -345,7 +330,7 @@ class _FullHistoryScreenState extends State<FullHistoryScreen> {
                         child: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 14),
                           child: Text(
-                            tx.date,
+                            '${tx.date.year}/${tx.date.month.toString().padLeft(2, '0')}/${tx.date.day.toString().padLeft(2, '0')}',
                             style: GoogleFonts.inter(
                               fontSize: 13,
                               color: Colors.white,
@@ -362,7 +347,7 @@ class _FullHistoryScreenState extends State<FullHistoryScreen> {
                         flex: 16,
                         child: Center(
                           child: Text(
-                            tx.type,
+                            tx.type == 'charge' ? 'チャージ' : '決済',
                             style: GoogleFonts.inter(
                               fontSize: 13,
                               color: Colors.white,
@@ -380,11 +365,11 @@ class _FullHistoryScreenState extends State<FullHistoryScreen> {
                         child: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 14),
                           child: Text(
-                            '${tx.isCredit ? '+' : '-'}${_formatNumber(tx.amount)}P',
+                            '${tx.type == 'charge' ? '+' : '-'}${_formatNumber(tx.amount.toInt())}P',
                             textAlign: TextAlign.right,
                             style: GoogleFonts.inter(
                               fontSize: 13,
-                              color: tx.isCredit
+                              color: tx.type == 'charge'
                                   ? AppColors.primaryBlue
                                   : AppColors.error,
                               fontWeight: FontWeight.w500,
@@ -640,14 +625,9 @@ class _FullHistoryScreenState extends State<FullHistoryScreen> {
     return parsed;
   }
 
-  List<Transaction> _getFilteredTransactions() {
+  List<model.Transaction> _getFilteredTransactions() {
     return _allTransactions.where((tx) {
-      final parts = tx.date.split('/');
-      final txDate = DateTime(
-        int.parse(parts[0]),
-        int.parse(parts[1]),
-        int.parse(parts[2]),
-      );
+      final txDate = tx.date;
 
       final dateMatch = _dateRange == null
           ? true
@@ -655,9 +635,9 @@ class _FullHistoryScreenState extends State<FullHistoryScreen> {
                 !txDate.isAfter(_dateRange!.end);
 
       final typeMatch = _selectedFilter == 'charge'
-          ? tx.isCredit
+          ? tx.type == 'charge'
           : _selectedFilter == 'payment'
-          ? !tx.isCredit
+          ? tx.type == 'payment'
           : true;
 
       return dateMatch && typeMatch;

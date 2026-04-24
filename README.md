@@ -14,6 +14,7 @@ A professional Flutter-based Android mockup application built to showcase a digi
 - [Project Structure](#project-structure)
 - [Tech Stack](#tech-stack)
 - [Setup Instructions](#setup-instructions)
+- [How to Verify Screens and Features](#how-to-verify-screens-and-features)
 - [Screens & Navigation](#screens--navigation)
 - [State Management](#state-management)
 - [Design System](#design-system)

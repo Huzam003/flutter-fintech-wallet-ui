@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import '../theme/design_system.dart';
 import '../widgets/number_keypad.dart';
+import '../providers/transaction_provider.dart';
 
 class PaymentAmountScreen extends StatefulWidget {
   final String? merchantData;
@@ -14,13 +16,12 @@ class PaymentAmountScreen extends StatefulWidget {
 
 class _PaymentAmountScreenState extends State<PaymentAmountScreen> {
   String _amount = '';
-  final int _currentBalance = 10000;
 
-  bool get _isValid =>
+  bool _isValid(double currentBalance) =>
       _amount.isNotEmpty &&
       int.tryParse(_amount) != null &&
       int.parse(_amount) > 0 &&
-      int.parse(_amount) <= _currentBalance;
+      int.parse(_amount) <= currentBalance;
 
   void _onKeyPressed(String value) {
     setState(() {
@@ -39,8 +40,8 @@ class _PaymentAmountScreenState extends State<PaymentAmountScreen> {
     });
   }
 
-  void _proceed() {
-    if (!_isValid) return;
+  void _proceed(double currentBalance) {
+    if (!_isValid(currentBalance)) return;
 
     // Navigate to biometric auth with payment details
     Navigator.of(context).pushNamed(
@@ -67,6 +68,9 @@ class _PaymentAmountScreenState extends State<PaymentAmountScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final currentBalance = context.watch<TransactionProvider>().balance;
+    final bool isValid = _isValid(currentBalance);
+
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
@@ -151,7 +155,7 @@ class _PaymentAmountScreenState extends State<PaymentAmountScreen> {
                   Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
-                      '現在の残高 ${_formatNumber(_currentBalance)}P',
+                      '現在の残高 ${_formatNumber(currentBalance.toInt())}P',
                       style: GoogleFonts.inter(
                         color: Colors.grey[500],
                         fontSize: 12,
@@ -167,9 +171,9 @@ class _PaymentAmountScreenState extends State<PaymentAmountScreen> {
                       width: 287,
                       height: 60,
                       child: ElevatedButton(
-                        onPressed: _isValid ? _proceed : null,
+                        onPressed: isValid ? () => _proceed(currentBalance) : null,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: _isValid
+                          backgroundColor: isValid
                               ? AppColors.primaryBlue
                               : const Color(0xFF2C2C2E),
                           disabledBackgroundColor: const Color(0xFF2C2C2E),
@@ -183,7 +187,7 @@ class _PaymentAmountScreenState extends State<PaymentAmountScreen> {
                           style: GoogleFonts.inter(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
-                            color: _isValid ? Colors.white : Colors.white24,
+                            color: isValid ? Colors.white : Colors.white24,
                           ),
                         ),
                       ),

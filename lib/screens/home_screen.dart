@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../providers/auth_provider.dart';
 import '../providers/verification_provider.dart';
 import '../providers/payment_methods_provider.dart';
+import '../providers/transaction_provider.dart';
 import '../models/user.dart';
 import '../theme/design_system.dart';
 import '../widgets/loading_spinner.dart';
@@ -115,13 +116,14 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final user = context.watch<AuthProvider>().user;
+    final balance = context.watch<TransactionProvider>().balance;
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: _buildHomeContent(context, user),
+      body: _buildHomeContent(context, user, balance),
     );
   }
 
-  Widget _buildHomeContent(BuildContext context, User? user) {
+  Widget _buildHomeContent(BuildContext context, User? user, double balance) {
     final paymentMethods = context.watch<PaymentMethodsProvider>();
     final bool hasPayment =
         paymentMethods.hasBankAccount || paymentMethods.hasCreditCard;
@@ -287,7 +289,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                   )
                                 else
                                   Text(
-                                    _isBalanceVisible ? '10,000 P' : '****** P',
+                                    _isBalanceVisible
+                                        ? '${_formatNumber(balance.toInt())} P'
+                                        : '****** P',
                                     textAlign: TextAlign.center,
                                     style: GoogleFonts.inter(
                                       fontSize: 36,
@@ -343,6 +347,13 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  String _formatNumber(int number) {
+    return number.toString().replaceAllMapped(
+      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+      (m) => '${m[1]},',
     );
   }
 

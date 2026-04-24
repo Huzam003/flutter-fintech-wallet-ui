@@ -272,14 +272,15 @@ build/app/outputs/flutter-apk/app-release.apk
 
 ## 状態管理
 
-`provider`パッケージを使用し、4つの`ChangeNotifier`プロバイダーで構成されています。
+`provider`パッケージを使用し、5つの`ChangeNotifier`プロバイダーで構成されています。
 
 | プロバイダー | 担当 |
 |---|---|
-| `AuthProvider` | ログイン・登録・ログアウト・生体認証・プロフィール更新 |
-| `SettingsProvider` | アプリ設定（言語・通知など） |
-| `PaymentMethodsProvider` | 登録済み銀行口座・クレジットカードの管理 |
-| `VerificationProvider` | KYC／本人確認の状態管理 |
+| `AuthProvider` | ユーザー認証状態 |
+| `TransactionProvider` | 残高および入出金履歴（リアルタイム更新対応） |
+| `SettingsProvider` | アプリ設定（生体認証、パスコード等） |
+| `PaymentMethodsProvider` | 支払い方法（銀行口座、カード） |
+| `VerificationProvider` | 本人確認ステータス |
 
 すべてのプロバイダーは`main.dart`の`MultiProvider`でルートに登録されています。
 

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../providers/payment_methods_provider.dart';
+import '../providers/transaction_provider.dart';
 import '../theme/design_system.dart';
 
 class ChargeAmountScreen extends StatefulWidget {
@@ -88,6 +89,7 @@ class _ChargeAmountScreenState extends State<ChargeAmountScreen> {
   @override
   Widget build(BuildContext context) {
     final paymentMethods = context.watch<PaymentMethodsProvider>();
+    final balance = context.watch<TransactionProvider>().balance;
     final isChargeButtonEnabled =
         _hasEnteredAmount &&
         _isPaymentMethodAvailable(paymentMethods, _selectedPayment);
@@ -239,7 +241,7 @@ class _ChargeAmountScreenState extends State<ChargeAmountScreen> {
                     ),
                   ),
                   TextSpan(
-                    text: '10000P',
+                    text: '${_formatNumber(balance.toInt())}P',
                     style: GoogleFonts.inter(
                       color: Colors.white,
                       fontSize: 11,

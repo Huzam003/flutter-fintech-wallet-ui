@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import '../theme/design_system.dart';
 import '../widgets/loading_spinner.dart';
+import '../providers/transaction_provider.dart';
+import '../models/transaction.dart' as model;
 
 class HistoryScreen extends StatefulWidget {
   const HistoryScreen({super.key});
@@ -14,7 +17,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
   bool _isLoading = false;
   bool _hasError = false;
   bool _isBalanceVisible = false;
-  List<Transaction>? _transactions;
+  bool _isBalanceVisible = false;
+  List<model.Transaction>? _transactions;
 
   @override
   void initState() {
@@ -28,12 +32,13 @@ class _HistoryScreenState extends State<HistoryScreen> {
       _hasError = false;
     });
 
-    await Future.delayed(const Duration(seconds: 1));
+    await Future.delayed(const Duration(milliseconds: 500));
 
     if (mounted) {
+      final txProvider = context.read<TransactionProvider>();
       setState(() {
         _isLoading = false;
-        _transactions = _getSampleTransactions();
+        _transactions = txProvider.transactions;
       });
     }
   }
@@ -75,6 +80,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final balance = context.watch<TransactionProvider>().balance;
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
@@ -117,10 +123,10 @@ class _HistoryScreenState extends State<HistoryScreen> {
       return _buildEmptyState();
     }
 
-    return _buildHistoryContent();
+    return _buildHistoryContent(balance);
   }
 
-  Widget _buildHistoryContent() {
+  Widget _buildHistoryContent(double balance) {
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
@@ -180,7 +186,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
                       horizontal: 20,
                     ),
                     child: Text(
-                      _isBalanceVisible ? '10,000 P' : '****** P',
+                      _isBalanceVisible
+                          ? '${_formatNumber(balance.toInt())} P'
+                          : '****** P',
                       style: GoogleFonts.inter(
                         color: Colors.white,
                         fontSize: 28,
@@ -320,7 +328,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
     );
   }
 
-  Widget _buildTransactionRow(Transaction tx) {
+  Widget _buildTransactionRow(model.Transaction tx) {
     const rowHeight = 44.0;
     const borderColor = AppColors.border;
     return InkWell(
@@ -338,7 +346,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 14),
                 child: Text(
-                  tx.date,
+                  '${tx.date.year}/${tx.date.month.toString().padLeft(2, '0')}/${tx.date.day.toString().padLeft(2, '0')}',
                   style: GoogleFonts.inter(fontSize: 13, color: Colors.white),
                 ),
               ),
@@ -348,7 +356,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
               flex: 16,
               child: Center(
                 child: Text(
-                  tx.type,
+                  tx.type == 'charge' ? 'チャージ' : '決済',
                   style: GoogleFonts.inter(fontSize: 13, color: Colors.white),
                 ),
               ),
@@ -359,11 +367,11 @@ class _HistoryScreenState extends State<HistoryScreen> {
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 14),
                 child: Text(
-                  '${tx.isCredit ? '+' : '-'}${_formatNumber(tx.amount)}P',
+                  '${tx.type == 'charge' ? '+' : '-'}${_formatNumber(tx.amount.toInt())}P',
                   textAlign: TextAlign.right,
                   style: GoogleFonts.inter(
                     fontSize: 13,
-                    color: tx.isCredit
+                    color: tx.type == 'charge'
                         ? AppColors.primaryBlue
                         : AppColors.error,
                     fontWeight: FontWeight.w500,
